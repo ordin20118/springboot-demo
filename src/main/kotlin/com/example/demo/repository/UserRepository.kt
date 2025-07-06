@@ -18,10 +18,16 @@ interface UserRepository : JpaRepository<User, Long> {
     @Query(value = "SELECT * FROM users WHERE email = :email", nativeQuery = true)
     fun findByEmailRawQuery(@Param("email") email: String): Optional<User>
     
-    @Query(value = "SELECT * FROM users WHERE role = :role", nativeQuery = true)
-    fun findByRoleRawQuery(@Param("role") role: String): List<User>
+    @Query(value = "SELECT * FROM users WHERE state = :state", nativeQuery = true)
+    fun findByStateRawQuery(@Param("state") state: String): List<User>
     
     // JPQL 예시
-    @Query("SELECT u FROM User u WHERE u.name LIKE %:name%")
-    fun findByNameContaining(@Param("name") name: String): List<User>
+    @Query("SELECT u FROM User u WHERE u.nickname LIKE %:nickname%")
+    fun findByNicknameContaining(@Param("nickname") nickname: String): List<User>
+    
+    @Query("SELECT u FROM User u WHERE u.age BETWEEN :minAge AND :maxAge")
+    fun findByAgeBetween(@Param("minAge") minAge: Int, @Param("maxAge") maxAge: Int): List<User>
+    
+    @Query("SELECT u FROM User u WHERE u.state = :state")
+    fun findByState(@Param("state") state: com.example.demo.domain.UserState): List<User>
 } 

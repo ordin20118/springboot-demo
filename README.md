@@ -70,14 +70,143 @@ cd springboot-demo
 ./gradlew bootRun
 ```
 
-### 2. Docker 환경
+### 2. Docker 환경 (외부 MySQL 서버 사용)
+
+#### 환경별 실행 방법
+
+**개발 환경 실행 (외부 MySQL 서버 사용):**
+```bash
+# 1. 환경 변수 설정
+cp env.example .env
+# .env 파일을 편집하여 개발용 외부 MySQL 서버 정보 입력
+
+# 2. 개발 환경 실행
+./run-dev.sh
+```
+
+**운영 환경 실행:**
+```bash
+# 1. 환경 변수 설정
+cp env.example .env
+# .env 파일을 편집하여 운영용 외부 MySQL 서버 정보 입력
+
+# 2. 운영 환경 실행
+./run-prod.sh
+```
+
+**수동 실행:**
+```bash
+# 개발 환경 (외부 MySQL 서버 사용)
+ENVIRONMENT=dev docker-compose -f docker-compose.dev.yml up --build
+
+# 운영 환경
+ENVIRONMENT=prod docker-compose up --build -d
+```
+
+**개발용 MySQL 관리:**
+```bash
+# MySQL 컨테이너만 시작
+./dev-mysql.sh start
+
+# MySQL 컨테이너만 중지
+./dev-mysql.sh stop
+
+# MySQL에 직접 연결
+./dev-mysql.sh connect
+
+# MySQL 데이터 초기화
+./dev-mysql.sh reset
+```
+
+### 3. 환경 변수 설정
+
+프로젝트 루트에 `.env` 파일을 생성하고 다음 정보를 설정하세요:
 
 ```bash
-# Docker Compose로 실행
-docker-compose up --build
+# ========================================
+# 환경 설정 (ENVIRONMENT)
+# ========================================
+# 개발 환경: dev
+# 운영 환경: prod
+ENVIRONMENT=dev
 
-# 백그라운드 실행
-docker-compose up -d --build
+# ========================================
+# 개발 환경 설정 (Development)
+# ========================================
+# 개발용 데이터베이스
+DEV_SPRING_DATASOURCE_URL=jdbc:mysql://localhost:3306/demo_dev?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+DEV_SPRING_DATASOURCE_USERNAME=demo_dev
+DEV_SPRING_DATASOURCE_PASSWORD=demo_dev_password
+
+# 개발용 JWT 설정
+DEV_JWT_SECRET=dev-secret-key-change-in-production
+DEV_JWT_EXPIRATION=86400000
+
+# ========================================
+# 운영 환경 설정 (Production)
+# ========================================
+# 운영용 데이터베이스
+PROD_SPRING_DATASOURCE_URL=jdbc:mysql://your-prod-mysql-host:3306/demo_prod?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+PROD_SPRING_DATASOURCE_USERNAME=demo_prod
+PROD_SPRING_DATASOURCE_PASSWORD=your-strong-production-password
+
+# 운영용 JWT 설정
+PROD_JWT_SECRET=your-very-long-and-secure-production-secret-key
+PROD_JWT_EXPIRATION=3600000
+
+# ========================================
+# 공통 설정 (Common)
+# ========================================
+# 애플리케이션 포트
+APP_PORT=8080
+
+# 로그 레벨
+LOG_LEVEL=INFO
+```
+
+**⚠️ 보안 주의사항:**
+- `.env` 파일은 절대 Git에 커밋하지 마세요
+- 실제 운영 환경의 데이터베이스 정보는 안전하게 관리하세요
+- `env.example` 파일은 템플릿용이므로 Git에 포함됩니다
+
+### 4. 환경별 설정 차이점
+
+| 설정 항목 | 개발 환경 (dev) | 운영 환경 (prod) |
+|-----------|----------------|------------------|
+| 데이터베이스 | MySQL (외부 서버) | MySQL (외부 서버) |
+| JPA DDL | create-drop | validate |
+| SQL 로깅 | 활성화 | 비활성화 |
+| H2 Console | 비활성화 | 비활성화 |
+| Swagger UI | 활성화 | 선택적 비활성화 |
+| 로그 레벨 | DEBUG | INFO |
+| JWT 만료시간 | 24시간 | 1시간 |
+| SSL | 선택적 | 필수 |
+
+### 5. 외부 MySQL 서버 설정
+
+**개발용 MySQL 서버 정보:**
+- **호스트**: `your-dev-mysql-host:3306`
+- **데이터베이스**: `demo_dev`
+- **사용자**: `your-dev-username`
+- **비밀번호**: `your-dev-password`
+
+**운영용 MySQL 서버 정보:**
+- **호스트**: `your-prod-mysql-host:3306`
+- **데이터베이스**: `demo_prod`
+- **사용자**: `demo_prod`
+- **비밀번호**: `your-strong-production-password`
+
+**환경 변수 설정 예시:**
+```bash
+# 개발용 MySQL 서버
+DEV_SPRING_DATASOURCE_URL=jdbc:mysql://dev-mysql.company.com:3306/demo_dev
+DEV_SPRING_DATASOURCE_USERNAME=dev_user
+DEV_SPRING_DATASOURCE_PASSWORD=dev_password
+
+# 운영용 MySQL 서버
+PROD_SPRING_DATASOURCE_URL=jdbc:mysql://prod-mysql.company.com:3306/demo_prod
+PROD_SPRING_DATASOURCE_USERNAME=prod_user
+PROD_SPRING_DATASOURCE_PASSWORD=prod_password
 ```
 
 ## API 엔드포인트

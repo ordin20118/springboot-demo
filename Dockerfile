@@ -19,7 +19,7 @@ COPY src ./src
 RUN gradle build --no-daemon
 
 # Runtime stage
-FROM openjdk:21-jre-slim
+FROM eclipse-temurin:21-jre-alpine
 
 # Set working directory
 WORKDIR /app

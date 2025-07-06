@@ -1,7 +1,8 @@
 package com.example.demo.config
 
-import com.example.demo.security.CustomUserDetailsService
 import com.example.demo.security.JwtAuthenticationFilter
+import com.example.demo.service.AccessTokenService
+import com.example.demo.service.UserService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -17,8 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    private val jwtAuthenticationFilter: JwtAuthenticationFilter,
-    private val customUserDetailsService: CustomUserDetailsService
+    private val accessTokenService: AccessTokenService,
+    private val userService: UserService
 ) {
     
     @Bean
@@ -30,6 +31,11 @@ class SecurityConfig(
     fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
         return config.authenticationManager
     }
+
+    @Bean
+    fun jwtAuthenticationFilter(): JwtAuthenticationFilter {
+        return JwtAuthenticationFilter(accessTokenService, userService)
+    }
     
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -39,14 +45,14 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
+                    .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api-docs/**").permitAll()
                     .requestMatchers("/h2-console/**").permitAll()
                     .anyRequest().authenticated()
             }
             .headers { headers ->
                 headers.frameOptions().disable() // H2 Console을 위한 설정
             }
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
         
         return http.build()
     }

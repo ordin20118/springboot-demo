@@ -1,7 +1,11 @@
 package com.example.demo.controller
 
-import com.example.demo.domain.UserRole
+import com.example.demo.domain.UserState
+import com.example.demo.domain.SocialProvider
 import com.example.demo.dto.UserResponse
+import com.example.demo.dto.UserUpdateRequest
+import com.example.demo.dto.UserWithdrawRequest
+import com.example.demo.dto.SocialAccountRequest
 import com.example.demo.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -9,6 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import jakarta.validation.Valid
 
 @RestController
 @RequestMapping("/api/users")
@@ -34,13 +39,13 @@ class UserController(
         return ResponseEntity.ok(user)
     }
     
-    @GetMapping("/role/{role}")
-    @Operation(summary = "역할별 사용자 조회", description = "특정 역할을 가진 사용자들을 조회합니다")
+    @GetMapping("/state/{state}")
+    @Operation(summary = "상태별 사용자 조회", description = "특정 상태를 가진 사용자들을 조회합니다")
     @PreAuthorize("hasRole('ADMIN')")
-    fun getUsersByRole(
-        @Parameter(description = "사용자 역할") @PathVariable role: UserRole
+    fun getUsersByState(
+        @Parameter(description = "사용자 상태") @PathVariable state: UserState
     ): ResponseEntity<List<UserResponse>> {
-        val users = userService.getUsersByRole(role)
+        val users = userService.getUsersByState(state)
         return ResponseEntity.ok(users)
     }
     
@@ -55,13 +60,62 @@ class UserController(
     }
     
     @GetMapping("/search/complex")
-    @Operation(summary = "복합 조건으로 사용자 검색", description = "이름과 역할을 조건으로 사용자들을 검색합니다")
+    @Operation(summary = "복합 조건으로 사용자 검색", description = "닉네임과 상태를 조건으로 사용자들을 검색합니다")
     @PreAuthorize("hasRole('ADMIN')")
     fun searchUsersByComplexCondition(
-        @Parameter(description = "검색할 이름") @RequestParam(required = false) name: String?,
-        @Parameter(description = "검색할 역할") @RequestParam(required = false) role: UserRole?
+        @Parameter(description = "검색할 닉네임") @RequestParam(required = false) nickname: String?,
+        @Parameter(description = "검색할 상태") @RequestParam(required = false) state: UserState?
     ): ResponseEntity<List<UserResponse>> {
-        val users = userService.searchUsersByComplexCondition(name, role)
+        val users = userService.searchUsersByComplexCondition(nickname, state)
         return ResponseEntity.ok(users)
+    }
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "사용자 정보 수정", description = "사용자 정보를 수정합니다")
+    fun updateUser(
+        @Parameter(description = "사용자 ID") @PathVariable id: Long,
+        @Valid @RequestBody request: UserUpdateRequest
+    ): ResponseEntity<UserResponse> {
+        val user = userService.updateUser(id, request)
+        return ResponseEntity.ok(user)
+    }
+    
+    @PostMapping("/{id}/withdraw")
+    @Operation(summary = "회원 탈퇴", description = "사용자를 탈퇴 처리합니다")
+    fun withdrawUser(
+        @Parameter(description = "사용자 ID") @PathVariable id: Long,
+        @Valid @RequestBody request: UserWithdrawRequest
+    ): ResponseEntity<UserResponse> {
+        val user = userService.withdrawUser(id, request)
+        return ResponseEntity.ok(user)
+    }
+    
+    @PostMapping("/{id}/login")
+    @Operation(summary = "로그인 시간 업데이트", description = "사용자의 마지막 로그인 시간을 업데이트합니다")
+    fun updateLastLogin(
+        @Parameter(description = "사용자 ID") @PathVariable id: Long
+    ): ResponseEntity<Void> {
+        userService.updateLastLogin(id)
+        return ResponseEntity.ok().build()
+    }
+    
+    @PostMapping("/{id}/social-accounts")
+    @Operation(summary = "소셜 계정 연결", description = "사용자에게 소셜 계정을 연결합니다")
+    fun connectSocialAccount(
+        @Parameter(description = "사용자 ID") @PathVariable id: Long,
+        @Valid @RequestBody request: SocialAccountRequest
+    ): ResponseEntity<UserResponse> {
+        val user = userService.connectSocialAccount(id, request)
+        return ResponseEntity.ok(user)
+    }
+    
+    @DeleteMapping("/{id}/social-accounts/{provider}")
+    @Operation(summary = "소셜 계정 연결 해제", description = "사용자의 소셜 계정 연결을 해제합니다")
+    fun disconnectSocialAccount(
+        @Parameter(description = "사용자 ID") @PathVariable id: Long,
+        @Parameter(description = "소셜 플랫폼") @PathVariable provider: SocialProvider
+    ): ResponseEntity<UserResponse> {
+        val user = userService.disconnectSocialAccount(id, provider)
+        return ResponseEntity.ok(user)
     }
 } 

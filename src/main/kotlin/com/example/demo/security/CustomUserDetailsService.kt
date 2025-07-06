@@ -18,8 +18,12 @@ class CustomUserDetailsService(
         
         return User.builder()
             .username(user.email)
-            .password(user.password)
-            .authorities(listOf(SimpleGrantedAuthority("ROLE_${user.role.name}")))
+            .password("") // 소셜 로그인 기반이므로 비밀번호 불필요
+            .authorities(listOf(SimpleGrantedAuthority("ROLE_USER"))) // 기본 USER 권한
+            .accountExpired(false)
+            .accountLocked(user.state != com.example.demo.domain.UserState.ACTIVE)
+            .credentialsExpired(false)
+            .disabled(user.state == com.example.demo.domain.UserState.WITHDRAWN)
             .build()
     }
 } 

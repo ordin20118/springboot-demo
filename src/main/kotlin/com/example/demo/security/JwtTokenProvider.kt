@@ -32,6 +32,18 @@ class JwtTokenProvider {
             .compact()
     }
     
+    fun generateToken(username: String): String {
+        val now = Date()
+        val expiryDate = Date(now.time + jwtExpirationMs)
+        
+        return Jwts.builder()
+            .setSubject(username)
+            .setIssuedAt(now)
+            .setExpiration(expiryDate)
+            .signWith(Keys.hmacShaKeyFor(jwtSecret.toByteArray()), SignatureAlgorithm.HS512)
+            .compact()
+    }
+    
     fun getUsernameFromToken(token: String): String {
         val claims = Jwts.parser()
             .setSigningKey(jwtSecret.toByteArray())

@@ -8,7 +8,7 @@ plugins {
 	id("org.springdoc.openapi-gradle-plugin") version "1.8.0"
 }
 
-group = "com.example"
+group = "kr.co.tipsy.api"
 version = "0.0.1-SNAPSHOT"
 
 java {
@@ -41,22 +41,18 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-impl:0.11.5")
 	implementation("io.jsonwebtoken:jjwt-jackson:0.11.5")
 	
+	// Apple Login
+	implementation("org.springframework.boot:spring-boot-starter-webflux") // WebClient for HTTP requests
+	implementation("org.bouncycastle:bcprov-jdk15on:1.70") // Cryptographic operations
+	implementation("com.nimbusds:nimbus-jose-jwt:9.37.3") // JWT handling for Apple
+	
 	// QueryDSL
 	implementation("com.querydsl:querydsl-jpa:5.0.0:jakarta")
-	annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
 	kapt("com.querydsl:querydsl-apt:5.0.0:jakarta")
+	kapt("org.springframework:spring-context")
 	
 	// Swagger/OpenAPI
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
-	
-	// Test
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testImplementation("org.springframework.security:spring-security-test")
-	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-	testImplementation("org.assertj:assertj-core")
-	testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
-	testImplementation("com.h2database:h2")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
 }
 
 kotlin {
@@ -64,14 +60,6 @@ kotlin {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
 	}
 	sourceSets["main"].kotlin.srcDir("build/generated/source/kapt/main")
-}
-
-tasks.withType<Test> {
-	useJUnitPlatform()
-	testLogging {
-		events("passed", "skipped", "failed")
-		showStandardStreams = true
-	}
 }
 
 // QueryDSL 설정
@@ -86,8 +74,4 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 		freeCompilerArgs += "-Xjsr305=strict"
 		jvmTarget = "21"
 	}
-}
-
-tasks.named("kaptTest") {
-	enabled = false
 }

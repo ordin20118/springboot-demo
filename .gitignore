@@ -38,3 +38,50 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Security & Environment Files ###
+# 환경 변수 파일
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.docker
+
+# 설정 파일
+application-docker.properties
+application.properties
+*.properties
+
+
+# 키 파일들
+*.key
+*.pem
+*.p8
+*.p12
+*.jks
+*.keystore
+
+# 로그 파일들
+*.log
+logs/
+
+# 임시 파일들
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# OS 생성 파일들
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker 관련
+docker-compose.override.yml
+docker-compose.prod.yml
